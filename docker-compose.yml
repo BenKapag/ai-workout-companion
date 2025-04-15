@@ -1,9 +1,9 @@
 version: "3.9"
 
 services:
-  db:  # Standard service name for database
+  db:  # service name for database
     image: postgres:14
-    container_name: db_container  # You’ll see this name in `docker ps`
+    container_name: db_container  
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Store data even if container is removed
     ports:
-      - "5432:5432"  # Make the DB accessible to your local machine
+      - "5432:5432"  # Make the DB accessible to the local machine
 
 volumes:
   postgres_data:  # Volume declaration for persistent data
