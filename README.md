@@ -6,7 +6,7 @@ A modular, AI-powered fitness app designed to generate personalized training pla
 
 ## 🎯 Project Purpose
 
-This project was created for the *Engineering of Advanced Software Solutions* course at HIT, and serves as a full-stack demonstration of microservices architecture, AI integration, and clean API design. It’s also designed to be a showcase-ready portfolio project.
+This project was created for the *Engineering of Advanced Software Solutions* course at HIT, and serves as a full-stack demonstration of microservices architecture, AI integration, and clean API design.
 
 ---
 
@@ -24,7 +24,7 @@ This project was created for the *Engineering of Advanced Software Solutions* co
 
 - `backend/`: Main API gateway, handles routing, validation, and business logic
 - `database/`: Will handle all DB access (users, profiles, workouts) via FastAPI
-- `ai-agent/`: Generates workout plans + answers fitness questions (future)
+- `ai-agent/`: Generates workout plans + answers fitness questions + Evaluate training trends, weak areas (future)
 - `frontend/`: User interface for interaction with the system
 
 ---
@@ -43,6 +43,7 @@ This project was created for the *Engineering of Advanced Software Solutions* co
 - AI-generated weekly training plans via `/plan`
 - AI chat endpoint for Q&A: `/ai/chat`
 - Workout logging and progress tracking
+- AI-powered analysis: Evaluate training trends, weak areas
 - JWT authentication
 - Full microservice separation and Docker Compose setup
 
