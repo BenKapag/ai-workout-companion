@@ -1,10 +1,14 @@
 # Import SQLAlchemy tools for defining the table columns and types
 from sqlalchemy import Column, Integer, String, ForeignKey, JSON
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import declarative_base
 
-# Import the Base class we created in database.py
+
 # This tells SQLAlchemy: "any class that inherits from this becomes a database table"
-from database import Base
+
+# Base class for declaring ORM models (tables)
+# All models should inherit from this
+Base = declarative_base()
 
 # Represents the authenticated user (login credentials only)
 class User(Base):

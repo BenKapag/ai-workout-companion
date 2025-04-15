@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
+from models import Base
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -22,6 +23,3 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
-# Base class for declaring ORM models (tables)
-# All models should inherit from this
-Base = declarative_base()
