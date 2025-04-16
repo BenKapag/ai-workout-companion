@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User, UserProfile
-from schemas import UserCreate, UserResponse, UserProfileCreate
+from schemas import UserCreate, UserResponse, UserProfileCreate,UserInDB
 from sqlalchemy import func
 
 # Create a router object to group user-related endpoints
@@ -20,7 +20,7 @@ def get_db():
         db.close()
 
 
-@router.post("/users", response_model=UserResponse)
+@router.post("/users", response_model=UserResponse,status_code=201)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new user in the system.
@@ -47,6 +47,20 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)  # Load the generated ID
 
     return new_user
+
+@router.get("/users/{username}",response_model=UserInDB)
+def get_user_by_username(username: str, db: Session = Depends(get_db)):
+    """
+    Used by the backend service for login verification.
+
+    Returns the user object (including hashed password) by username.
+    """
+    db_user = db.query(User).filter(User.username == username).first()
+
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return db_user  
 
 
 @router.put("/users/{user_id}/profile")

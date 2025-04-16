@@ -2,13 +2,13 @@
 # Entry point for the FastAPI application
 
 from fastapi import FastAPI
-from auth import router as auth_router  # Import auth routes
+from routers import user_routes  # Import user routes
 
 # Create the FastAPI app instance
 app = FastAPI()
 
 # Register the auth router (includes /register endpoint)
-app.include_router(auth_router)
+app.include_router(user_routes.router)
 
 # Simple health check route
 @app.get("/")

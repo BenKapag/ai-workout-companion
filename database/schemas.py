@@ -61,3 +61,12 @@ class UserProfileResponse(BaseModel):
 
     class Config:
         from_attributes = True  # Enables automatic conversion (to json) from SQLAlchemy models
+
+# Schema for user that exist in the database and returned in responses
+class UserInDB(BaseModel):
+    id: int
+    username: str
+    password: str  
+
+    class Config:
+        from_attributes = True

@@ -16,12 +16,12 @@ class UserProfileCreate(BaseModel):
 from pydantic import BaseModel
 
 # Schema for incoming registration requests
-class UserCreate(BaseModel):
+class RegisterRequest(BaseModel):
     username: str
     password: str
 
 # Schema for user data returned in responses
-class UserResponse(BaseModel):
+class RegisterResponse(BaseModel):
     id: int
     username: str
 
