@@ -66,7 +66,7 @@ class UserProfileResponse(BaseModel):
 class UserInDB(BaseModel):
     id: int
     username: str
-    password: str  
+    hashed_password: str  
 
     class Config:
         from_attributes = True

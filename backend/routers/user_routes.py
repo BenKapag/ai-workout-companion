@@ -68,7 +68,7 @@ async def login_user(login_credentials: LoginRequest):
         user_data = response.json()
 
         # Verify the password using bcrypt
-        if not verify_password(login_credentials.password, user_data["password"]):
+        if not verify_password(login_credentials.password, user_data["hashed_password"]):
             raise HTTPException(status_code=401, detail="Invalid password")
 
         # Login successful — return confirmation

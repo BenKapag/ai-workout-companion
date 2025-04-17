@@ -55,7 +55,7 @@ def get_user_by_username(username: str, db: Session = Depends(get_db)):
 
     Returns the user object (including hashed password) by username.
     """
-    db_user = db.query(User).filter(User.username == username).first()
+    db_user = db.query(User).filter(func.lower(User.username) == username.lower()).first()
 
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
