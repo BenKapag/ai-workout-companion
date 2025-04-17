@@ -37,6 +37,11 @@ class LoginRequest(BaseModel):
 # Response for successful login
 class LoginResponse(BaseModel):
     message: str
+    
+#Response for successful login include user jwt token for autentication
+class TokenLoginResponse(BaseModel):
+    message: str
+    token: str
 
 # Schema for creating new user profile
 class UserProfileCreate(BaseModel):

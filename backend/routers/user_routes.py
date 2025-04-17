@@ -1,8 +1,9 @@
 # routers/user_routes.py
 
 from fastapi import APIRouter, HTTPException
-from schemas import RegisterRequest,RegisterResponse,LoginRequest,LoginResponse
+from schemas import RegisterRequest,RegisterResponse,LoginRequest,TokenLoginResponse
 from passlib.context import CryptContext
+from services.token_service import create_access_token
 import httpx
 
 # Create the API router for user-related endpoints
@@ -46,7 +47,7 @@ async def register_user(user: RegisterRequest):
         raise HTTPException(status_code=500, detail=f"Database service unreachable: {e}")
 
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=TokenLoginResponse)
 async def login_user(login_credentials: LoginRequest):
     """
     Logs a user in by:
@@ -70,9 +71,12 @@ async def login_user(login_credentials: LoginRequest):
         # Verify the password using bcrypt
         if not verify_password(login_credentials.password, user_data["hashed_password"]):
             raise HTTPException(status_code=401, detail="Invalid password")
+        
+        #Credentials are valid, generating JWT token to the user autentication
+        access_token = create_access_token(data={"sub": login_credentials.username})
 
         # Login successful — return confirmation
-        return LoginResponse(message="Login successful")
+        return TokenLoginResponse(message="Login successful",token=access_token)
 
     except httpx.RequestError as e:
         # Handle networking errors (e.g., DB service is down)
