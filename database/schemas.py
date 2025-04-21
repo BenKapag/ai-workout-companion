@@ -4,16 +4,6 @@
 from typing import List, Optional
 from pydantic import BaseModel,Field
 
-class UserProfileCreate(BaseModel):
-    age: Optional[int] = None
-    height_cm: Optional[int] = None
-    weight_kg: Optional[int] = None
-    experience_level: Optional[str] = None
-    goal: Optional[str] = None
-    equipment: Optional[List[str]] = None
-    health_notes: Optional[str] = None
-
-from pydantic import BaseModel
 
 # Schema for incoming registration requests
 class UserCreate(BaseModel):
@@ -40,13 +30,13 @@ class LoginResponse(BaseModel):
 
 # Schema for creating new/update user profile
 class UserProfileCreate(BaseModel):
-    age: Optional[int]
-    height_cm: Optional[int]
-    weight_kg: Optional[int]
-    experience_level: Optional[str]
-    goal: Optional[str]
-    equipment: Optional[List[str]] 
-    health_notes: Optional[str]
+    age: Optional[int] = None
+    height_cm: Optional[int] = None
+    weight_kg: Optional[int] = None
+    experience_level: Optional[str] = None
+    fitness_goal: Optional[str] = None
+    equipment: Optional[List[str]] = None
+    health_notes: Optional[str] = None
 
 
 # Schema for user profile data returned in responses
@@ -55,7 +45,7 @@ class UserProfileResponse(BaseModel):
     height_cm: Optional[int]
     weight_kg: Optional[int]
     experience_level: Optional[str]
-    goal: Optional[str]
+    fitness_goal: Optional[str]
     equipment: Optional[List[str]]
     health_notes: Optional[str]
 

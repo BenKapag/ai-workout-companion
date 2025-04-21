@@ -1,11 +1,11 @@
 # routers/user_routes.py
 # Contains all user-related API endpoints: user registration and profile creation/update
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path,status
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User, UserProfile
-from schemas import UserCreate, UserResponse, UserProfileCreate,UserInDB
+from schemas import UserCreate, UserResponse, UserProfileCreate,UserInDB,UserProfileResponse
 from sqlalchemy import func
 
 # Create a router object to group user-related endpoints
@@ -93,4 +93,29 @@ def update_profile(
         db.add(new_profile)
 
     db.commit()
-    return {"message": "Profile updated or created successfully"}
+    return user.profile
+
+
+@router.get("/users/{user_id}/profile", response_model=UserProfileResponse)
+def get_profile(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves the profile of a given user by ID.
+
+    Returns:
+        UserProfileResponse: The user's profile data if found.
+
+    Raises:
+        404: If the user or profile does not exist.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if not user.profile:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User profile not found")
+
+    return user.profile
+

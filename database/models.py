@@ -43,7 +43,7 @@ class UserProfile(Base):
     height_cm = Column(Integer)
     weight_kg = Column(Integer)
     experience_level = Column(String)
-    goal = Column(String)
+    fitness_goal = Column(String)
     equipment = Column(JSON)  # Stored as a list of strings (e.g., ["dumbbells", "barbell"])
     health_notes = Column(String)
 

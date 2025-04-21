@@ -1,9 +1,11 @@
 # routers/user_routes.py
 
-from fastapi import APIRouter, HTTPException
-from schemas import RegisterRequest,RegisterResponse,LoginRequest,TokenLoginResponse
+from fastapi import APIRouter, HTTPException,Depends,status
+from schemas import RegisterRequest,RegisterResponse,LoginRequest,TokenLoginResponse,UserProfileCreate,UserProfileResponse
 from passlib.context import CryptContext
 from services.token_service import create_access_token
+from services.auth_dependency import get_current_user
+from services.db_service import get_user_by_username,get_user_profile_by_id,update_user_profile
 import httpx
 
 # Create the API router for user-related endpoints
@@ -53,7 +55,7 @@ async def login_user(login_credentials: LoginRequest):
     Logs a user in by:
     - Fetching their data from the database microservice by username
     - Verifying the submitted password matches the hashed password in the DB
-    - Returning a success message on match or an error otherwise
+    - Returning a success message and jwt token on match or an error otherwise
     """
 
     try:
@@ -83,9 +85,62 @@ async def login_user(login_credentials: LoginRequest):
         raise HTTPException(status_code=500, detail=f"Database service unreachable: {e}")
 
 
+@router.get("/me")
+def get_me(current_user: str = Depends(get_current_user)):
+    """
+    Returns the username of the currently authenticated user
+    based on the JWT token in the Authorization header.
+    """
+    return {"username": current_user}
+
+
+@router.put("/profile", response_model=UserProfileResponse)
+async def update_profile(
+    profile_data: UserProfileCreate,
+    username: str = Depends(get_current_user)
+):
+    """
+    Creates or updates the authenticated user's profile.
+
+    - On first-time setup, all fields must be provided.
+    - On later updates, partial changes are accepted.
+    """
+    # Fetch user metadata from the database using the username from the token
+    user = await get_user_by_username(username)
+    if not user or "id" not in user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_id = user["id"]
+
+    # Check if the user already has a profile
+    existing_profile = await get_user_profile_by_id(user_id)
+
+    # Enforce complete profile submission on first-time setup
+    if not existing_profile:
+        missing_fields = [
+            field for field, value in profile_data.dict().items()
+            if value is None
+        ]
+        if missing_fields:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Missing required fields for initial setup: {missing_fields}"
+            )
+
+    # Forward the update/create operation to the database microservice
+    updated_profile = await update_user_profile(user_id, profile_data)
+    if not updated_profile:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update or create profile"
+        )
+
+    return updated_profile
+
+
+
 
 #functions that we are using
-
 
 def hash_password(password: str) -> str:
     """
