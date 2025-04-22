@@ -4,16 +4,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
-class UserProfileCreate(BaseModel):
-    age: Optional[int] = None
-    height_cm: Optional[int] = None
-    weight_kg: Optional[int] = None
-    experience_level: Optional[str] = None
-    goal: Optional[str] = None
-    equipment: Optional[List[str]] = None
-    health_notes: Optional[str] = None
-
-from pydantic import BaseModel
 
 # Schema for incoming registration requests
 class RegisterRequest(BaseModel):

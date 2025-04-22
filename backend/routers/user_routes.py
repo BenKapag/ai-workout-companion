@@ -7,6 +7,7 @@ from services.token_service import create_access_token
 from services.auth_dependency import get_current_user
 from services.db_service import get_user_by_username,get_user_profile_by_id,update_user_profile
 import httpx
+from core.config import DB_SERVICE_URL
 
 # Create the API router for user-related endpoints
 router = APIRouter()
@@ -82,7 +83,7 @@ async def login_user(login_credentials: LoginRequest):
 
     except httpx.RequestError as e:
         # Handle networking errors (e.g., DB service is down)
-        raise HTTPException(status_code=500, detail=f"Database service unreachable: {e}")
+        raise HTTPException(status_code=503, detail=f"Database service unreachable: {e}")
 
 
 @router.get("/me")
@@ -92,6 +93,48 @@ def get_me(current_user: str = Depends(get_current_user)):
     based on the JWT token in the Authorization header.
     """
     return {"username": current_user}
+
+
+@router.get("/profile", response_model=UserProfileResponse)
+async def get_profile(current_user: str = Depends(get_current_user)):
+    """
+    Returns the profile of the authenticated user.
+    Resolves user ID from username, then retrieves the profile from the DB microservice.
+    """
+    # Fetch the user object (with ID) from the database using the username from JWT
+    user = await get_user_by_username(current_user)
+
+    if not user or "id" not in user:
+        # User does not exist or malformed response from DB service
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_id = user["id"]
+
+    try:
+        # Query the DB microservice for the user's profile by user ID
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{DB_SERVICE_URL}/users/{user_id}/profile")
+
+        if response.status_code != 200:
+            # Attempt to extract a clear error message from the DB response
+            try:
+                detail = response.json().get("detail", "Unknown error from DB service")
+            except ValueError:
+                detail = response.text  # Non-JSON response fallback
+
+            raise HTTPException(status_code=response.status_code, detail=detail)
+
+        # Profile found — return the response data as-is
+        return response.json()
+
+    except httpx.RequestError as e:
+        # Network issue, DB microservice is unreachable or timed out
+        raise HTTPException(
+            status_code=503,
+            detail=f"Database service unreachable: {e}"
+        )
+
+
 
 
 @router.put("/profile", response_model=UserProfileResponse)
