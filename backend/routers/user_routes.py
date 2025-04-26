@@ -15,8 +15,6 @@ router = APIRouter()
 # Password hashing configuration using bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Database microservice URL (update if needed for Docker later)
-DATABASE_SERVICE_URL = "http://localhost:8001"
 
 
 @router.post("/register", response_model=RegisterResponse)
@@ -36,7 +34,7 @@ async def register_user(user: RegisterRequest):
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(f"{DATABASE_SERVICE_URL}/users", json=data_to_send)
+            response = await client.post(f"{DB_SERVICE_URL}/users", json=data_to_send)
 
         if response.status_code != 201:
             error_message = response.json()  # Parse the actual error from the DB
@@ -62,7 +60,7 @@ async def login_user(login_credentials: LoginRequest):
     try:
         # Make a GET request to the DB microservice to fetch user by username
         async with httpx.AsyncClient() as client:
-            response = await client.get(f"{DATABASE_SERVICE_URL}/users/{login_credentials.username}")
+            response = await client.get(f"{DB_SERVICE_URL}/users/{login_credentials.username}")
 
         # If the user does not exist in the DB
         if response.status_code != 200:
