@@ -1,6 +1,6 @@
 import httpx
 from core.config import DB_SERVICE_URL
-from schemas import UserProfileCreate
+from schemas.user_profile_schemas import UserProfileCreate
 
 async def get_user_by_username(username: str) -> dict | None:
     """

@@ -1,5 +1,5 @@
 # Import SQLAlchemy tools for defining the table columns and types
-from sqlalchemy import Column, Integer, String, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, ForeignKey, JSON, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
@@ -68,7 +68,7 @@ class WorkoutPlan(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     # When the plan was created (auto set when plan is generated)
-    created_at = Column(datetime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Optional metadata fields copied from user profile when plan is generated
     duration_weeks = Column(Integer, nullable=True)  # Example: 4, 8, 12 weeks

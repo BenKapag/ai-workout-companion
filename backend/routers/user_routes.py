@@ -1,7 +1,8 @@
 # routers/user_routes.py
 
 from fastapi import APIRouter, HTTPException,Depends,status
-from schemas import RegisterRequest,RegisterResponse,LoginRequest,TokenLoginResponse,UserProfileCreate,UserProfileResponse
+from schemas.auth_schemas import RegisterRequest,RegisterResponse,LoginRequest,TokenLoginResponse
+from schemas.user_profile_schemas import UserProfileCreate,UserProfileResponse
 from passlib.context import CryptContext
 from services.token_service import create_access_token
 from services.auth_dependency import get_current_user

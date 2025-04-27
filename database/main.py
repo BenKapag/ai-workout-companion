@@ -1,8 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import User
-from schemas import UserCreate, UserResponse
 from routers.user_routes import router as user_router
 
 app = FastAPI(title="Database Microservice")
