@@ -75,7 +75,7 @@ async def login_user(login_credentials: LoginRequest):
             raise HTTPException(status_code=401, detail="Invalid password")
         
         #Credentials are valid, generating JWT token to the user autentication
-        access_token = create_access_token(data={"sub": login_credentials.username})
+        access_token = create_access_token(data={"sub": login_credentials.username,"user_id":user_data["id"]})
 
         # Login successful — return confirmation
         return TokenLoginResponse(message="Login successful",token=access_token)
