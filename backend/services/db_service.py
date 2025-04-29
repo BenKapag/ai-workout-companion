@@ -63,3 +63,25 @@ async def update_user_profile(user_id: int, profile_data: UserProfileCreate) -> 
         except httpx.HTTPError as e:
             print(f"[DB] PUT /users/{{id}}/profile failed: {e}")
             return None
+
+
+async def get_latest_user_plan(user_id: int) -> dict | None:
+    """
+    Retrieves the latest workout plan for a given user from the database microservice.
+
+    Args:
+        user_id (int): Unique user ID.
+
+    Returns:
+        dict | None: Latest workout plan data, or None if not found.
+    """
+    url = f"{DB_SERVICE_URL}/users/{user_id}/plans/last"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url)
+            response.raise_for_status()
+            return response.json()  # Returns the plan data as a Python dictionary
+        except httpx.HTTPError as e:
+            print(f"[DB] GET /users/{user_id}/plans/last failed: {e}")
+            return None

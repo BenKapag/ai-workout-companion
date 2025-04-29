@@ -53,30 +53,68 @@ async def generate_workout_plan(
 
     #(Temporary)!!!!!!! Mock AI Agent response
     generated_plan = {
-        "duration_weeks": 8,
-        "goal": user_profile.get("fitness_goal", "General Fitness"),
-        "experience_level": user_profile.get("experience_level", "Beginner"),
-        "days": [
-            {
-                "day_number": 1,
-                "day_name": "Chest Day",
-                "focus": "Chest + Triceps",
-                "exercises": [
-                    {"exercise_name": "Bench Press", "sets": 4, "reps": 10, "notes": "Control the lowering phase"},
-                    {"exercise_name": "Incline Dumbbell Press", "sets": 3, "reps": 12, "notes": "Focus on upper chest"}
-                ]
-            },
-            {
-                "day_number": 2,
-                "day_name": "Back Day",
-                "focus": "Back + Biceps",
-                "exercises": [
-                    {"exercise_name": "Deadlift", "sets": 4, "reps": 5, "notes": "Maintain straight back posture"},
-                    {"exercise_name": "Barbell Row", "sets": 3, "reps": 8, "notes": None}
-                ]
-            }
-        ]
-    }
+    "duration_weeks": 8,
+    "goal": user_profile.get("fitness_goal", "General Fitness"),
+    "experience_level": user_profile.get("experience_level", "Beginner"),
+    "days": [
+        {
+            "day_number": 1,
+            "day_name": "Chest Day",
+            "focus": "Chest + Triceps",
+            "exercises": [
+                {
+                    "exercise_name": "Barbell Bench Press",
+                    "equipment": "Barbell",
+                    "sets": 4,
+                    "reps": 8,
+                    "notes": "Use full range of motion"
+                },
+                {
+                    "exercise_name": "Incline Dumbbell Press",
+                    "equipment": "Dumbbell",
+                    "sets": 3,
+                    "reps": 10,
+                    "notes": "Pause at the bottom"
+                },
+                {
+                    "exercise_name": "Triceps Pushdown",
+                    "equipment": "Cable Machine",
+                    "sets": 3,
+                    "reps": 12,
+                    "notes": None
+                }
+            ]
+        },
+        {
+            "day_number": 2,
+            "day_name": "Back Day",
+            "focus": "Back + Biceps",
+            "exercises": [
+                {
+                    "exercise_name": "Deadlift",
+                    "equipment": "Barbell",
+                    "sets": 4,
+                    "reps": 5,
+                    "notes": "Maintain straight back posture"
+                },
+                {
+                    "exercise_name": "Seated Row",
+                    "equipment": "Cable Machine",
+                    "sets": 3,
+                    "reps": 10,
+                    "notes": "Squeeze shoulder blades at end"
+                },
+                {
+                    "exercise_name": "Barbell Curl",
+                    "equipment": "Barbell",
+                    "sets": 3,
+                    "reps": 12,
+                    "notes": None
+                }
+            ]
+        }
+    ]
+}
 
     #Save the generated plan into the database microservice
     payload = generated_plan

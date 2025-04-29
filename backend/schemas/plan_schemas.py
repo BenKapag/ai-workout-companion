@@ -4,9 +4,11 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
+
 #Exercise inside a Workout Day
 class ExerciseInPlan(BaseModel):
     exercise_name: str
+    equipment: Optional[str]
     sets: Optional[int]
     reps: Optional[int]
     notes: Optional[str]
