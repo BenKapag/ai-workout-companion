@@ -45,10 +45,17 @@ def get_latest_workout_plan_for_user(
 def create_workout_plan(plan_data: WorkoutPlanCreate, db: Session = Depends(get_db)):
     """
     Creates a full workout plan:
+    - Archives existing active plans for the user
     - Inserts WorkoutPlan
     - Inserts associated WorkoutDays
     - For each day, inserts WorkoutExercises and links to ExerciseCatalog
     """
+
+    #Archive existing active plans for this user
+    db.query(WorkoutPlan).filter(
+        WorkoutPlan.user_id == plan_data.user_id,
+        WorkoutPlan.status == "active"
+    ).update({WorkoutPlan.status: "archived"})
 
     #Insert the base WorkoutPlan
     new_plan = WorkoutPlan(
