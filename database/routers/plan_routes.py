@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Path
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from database import get_db
+from db_connection import get_db
 from models import WorkoutPlan,WorkoutDay, WorkoutExercise, ExerciseCatalog
 from schemas.plan_schemas import WorkoutPlanResponse,WorkoutPlanCreate
 from datetime import datetime

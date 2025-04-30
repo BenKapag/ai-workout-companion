@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from db_connection import SessionLocal
 from routers.user_routes import router as user_router
+from routers.plan_routes import router as plan_router
 
 app = FastAPI(title="Database Microservice")
 
@@ -19,3 +20,4 @@ def health_check():
 
 # Register all routes from user_routes.py
 app.include_router(user_router)
+app.include_router(plan_router)

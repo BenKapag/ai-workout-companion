@@ -3,7 +3,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Path,status
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from db_connection import SessionLocal,get_db
 from models import User, UserProfile
 from schemas.auth_schemas import UserCreate, UserResponse,UserInDB
 from schemas.user_profile_schemas import UserProfileCreate,UserProfileResponse
@@ -11,14 +11,6 @@ from sqlalchemy import func
 
 # Create a router object to group user-related endpoints
 router = APIRouter()
-
-# Dependency to provide a DB session to each request
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/users", response_model=UserResponse,status_code=201)

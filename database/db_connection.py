@@ -23,3 +23,11 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
+# Dependency to provide a DB session to each request
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
