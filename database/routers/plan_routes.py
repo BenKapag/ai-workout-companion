@@ -2,8 +2,9 @@ from fastapi import APIRouter, HTTPException, Depends, Path
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from database import get_db
-from models import WorkoutPlan
-from schemas.plan_schemas import WorkoutPlanResponse  
+from models import WorkoutPlan,WorkoutDay, WorkoutExercise, ExerciseCatalog
+from schemas.plan_schemas import WorkoutPlanResponse,WorkoutPlanCreate
+from datetime import datetime
 
 router = APIRouter()
 
@@ -38,3 +39,63 @@ def get_latest_workout_plan_for_user(
         raise HTTPException(status_code=404, detail="No workout plans found for this user")
 
     return latest_plan
+
+
+@router.post("/workout-plans")
+def create_workout_plan(plan_data: WorkoutPlanCreate, db: Session = Depends(get_db)):
+    """
+    Creates a full workout plan:
+    - Inserts WorkoutPlan
+    - Inserts associated WorkoutDays
+    - For each day, inserts WorkoutExercises and links to ExerciseCatalog
+    """
+
+    #Insert the base WorkoutPlan
+    new_plan = WorkoutPlan(
+        user_id=plan_data.user_id,
+        duration_weeks=plan_data.duration_weeks,
+        goal=plan_data.goal,
+        experience_level=plan_data.experience_level,
+        created_at=datetime.utcnow(),
+        status="active"
+    )
+    db.add(new_plan)
+    db.flush()  # So new_plan.id is generated and usable for WorkoutDays
+
+    #Insert WorkoutDays and associated exercises
+    for day in plan_data.days:
+        new_day = WorkoutDay(
+            plan_id=new_plan.id,
+            day_number=day.day_number,
+            day_name=day.day_name,
+            focus=day.focus
+        )
+        db.add(new_day)
+        db.flush()  # Get new_day.id to attach exercises
+
+        for ex in day.exercises:
+            # Find matching exercise in ExerciseCatalog by name + equipment
+            catalog_entry = db.query(ExerciseCatalog).filter(
+                func.lower(ExerciseCatalog.name) == ex.exercise_name.lower(),
+                func.lower(ExerciseCatalog.equipment) == (ex.equipment or "").lower()
+            ).first()
+
+            if not catalog_entry:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Exercise '{ex.exercise_name}' with equipment '{ex.equipment}' not found in catalog"
+                )
+
+            workout_ex = WorkoutExercise(
+                day_id=new_day.id,
+                exercise_catalog_id=catalog_entry.id,
+                sets=ex.sets,
+                reps=ex.reps,
+                notes=ex.notes
+            )
+            db.add(workout_ex)
+
+    #Commit all changes
+    db.commit()
+
+    return {"message": "Workout plan created successfully", "plan_id": new_plan.id}

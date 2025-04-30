@@ -2,9 +2,10 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from services.auth_dependency import get_current_user  # Dependency to extract current user from JWT token
-from services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan
+from services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan,save_workout_plan_to_db
 import httpx
 from core.config import DB_SERVICE_URL
+import copy
 
 
 # Initialize router for workout plan generation
@@ -117,26 +118,18 @@ async def generate_workout_plan(
 }
 
     #Save the generated plan into the database microservice
-    payload = generated_plan
+    payload = copy.deepcopy(generated_plan)
     payload["user_id"] = user_id  # Attach the correct user ID
 
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{DB_SERVICE_URL}/plans",
-                json=payload
-            )
-    except httpx.RequestError as e:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Failed to communicate with database service: {str(e)}"
-        )
+    created_plan_id  = await save_workout_plan_to_db(payload)
 
-    if response.status_code != status.HTTP_201_CREATED:
+    if not created_plan_id:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Database service error: {response.text}"
-        )
+             status_code=status.HTTP_502_BAD_GATEWAY,
+             detail="Failed to save the workout plan to the database."
+    )
 
     #Return a success response to the frontend
-    return {"message": "Workout plan generated and saved successfully!"}
+    return {"message": "Workout plan generated and saved successfully!",
+            "plan_id": created_plan_id,
+            "plan": generated_plan}

@@ -178,7 +178,7 @@ class ExerciseCatalog(Base):
     secondary_muscle = Column(String, nullable=True)
 
     # Equipment required (e.g., "Barbell", "Dumbbell", "Bodyweight")
-    equipment = Column(String, nullable=True)
+    equipment = Column(String, nullable=False)
 
     # Difficulty level (e.g., "Beginner", "Intermediate", "Advanced")
     difficulty = Column(String, nullable=True)

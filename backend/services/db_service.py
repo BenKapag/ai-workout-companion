@@ -85,3 +85,23 @@ async def get_latest_user_plan(user_id: int) -> dict | None:
         except httpx.HTTPError as e:
             print(f"[DB] GET /users/{user_id}/plans/last failed: {e}")
             return None
+        
+
+async def save_workout_plan_to_db(plan_data: dict) -> int | None:
+    """
+    Sends a generated workout plan to the database microservice for saving.
+
+    Args:
+        plan_data (dict): Structured plan including user_id, days, exercises
+
+    Returns:
+        bool: True if saved successfully, False otherwise
+    """
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(f"{DB_SERVICE_URL}/workout-plans", json=plan_data)
+            response.raise_for_status()
+            return response.json().get("plan_id")
+    except httpx.HTTPError as e:
+        print(f"[ERROR] Failed to save workout plan: {e}")
+        return None
