@@ -28,14 +28,35 @@ class WorkoutPlanCreate(BaseModel):
     experience_level: Optional[str] = None # e.g., "Beginner", "Intermediate", "Advanced"
     days: List[WorkoutDayCreate]
 
+
 # Workout Plan Response
 
+class WorkoutExerciseResponse(BaseModel):
+    exercise_name: str
+    equipment: str
+    sets: Optional[int]
+    reps: Optional[int]
+    notes: Optional[str]
+
+class WorkoutDayResponse(BaseModel):
+    day_number: int
+    day_name: Optional[str]
+    focus: Optional[str]
+    exercises: List[WorkoutExerciseResponse]
+
 class WorkoutPlanResponse(BaseModel):
-    id: int
-    duration_weeks: Optional[int]
     goal: Optional[str]
     experience_level: Optional[str]
-    days: List[WorkoutDayCreate]  
+    duration_weeks: Optional[int]
+    created_at: str
+    status: str
+    days: List[WorkoutDayResponse]
 
     class Config:
-        from_attributes = True  
+        from_attributes = True 
+
+#scheme of generated plan response for the frontend
+class GeneratedPlanResponse(BaseModel):
+    message: str
+    plan_id: int
+    plan: WorkoutPlanResponse

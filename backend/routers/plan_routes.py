@@ -2,19 +2,17 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from services.auth_dependency import get_current_user  # Dependency to extract current user from JWT token
-from services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan,save_workout_plan_to_db
+from services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan,save_workout_plan_to_db,db_service_get
+from schemas.plan_schemas import WorkoutPlanResponse,GeneratedPlanResponse
 import httpx
 from core.config import DB_SERVICE_URL
 import copy
-
+from typing import Optional,List
 
 # Initialize router for workout plan generation
-router = APIRouter(
-    prefix="/generate-plan",
-    tags=["Workout Plans"]
-)
+router = APIRouter()
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/generate-plan",response_model=GeneratedPlanResponse, status_code=status.HTTP_201_CREATED)
 async def generate_workout_plan(
     username: str = Depends(get_current_user)
 ):
@@ -133,3 +131,35 @@ async def generate_workout_plan(
     return {"message": "Workout plan generated and saved successfully!",
             "plan_id": created_plan_id,
             "plan": generated_plan}
+
+
+
+@router.get("/plans",response_model=List[WorkoutPlanResponse])
+async def get_user_plans(
+    status: Optional[str] = None,
+    current_user: str = Depends(get_current_user)
+):
+    """
+    Get workout plans for the logged-in user.
+    Optionally filter by status (e.g., 'active', 'archived').
+    """
+
+    #Fetch user full metadata
+    user = await get_user_by_username(current_user)
+    if not user or "id" not in user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    user_id = user["id"]
+
+    try:
+        # Build query string
+        query_string = f"?user_id={user_id}"
+        if status:
+            query_string += f"&status={status}"
+
+        # Send request to DB microservice
+        response = await db_service_get(f"/workout-plans{query_string}")
+        return response
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

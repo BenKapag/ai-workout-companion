@@ -105,3 +105,29 @@ async def save_workout_plan_to_db(plan_data: dict) -> int | None:
     except httpx.HTTPError as e:
         print(f"[ERROR] Failed to save workout plan: {e}")
         return None
+    
+    
+
+async def db_service_get(endpoint: str):
+    """
+    Sends a GET request to the database microservice.
+
+    Parameters:
+    - endpoint: the relative URL path, e.g., "workout-plans?user_id=5"
+
+    Returns:
+    - The response JSON (parsed as dict or list)
+    - Raises HTTPError if the response fails (caught in your route)
+    """
+    # Build the full URL safely to avoid double slashes
+    url = f"{DB_SERVICE_URL.rstrip('/')}/{endpoint.lstrip('/')}"
+
+    # Use async HTTP client to send the request
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+
+        # Raise an exception if the status code is 4xx or 5xx
+        response.raise_for_status()
+
+        # Parse and return the response body as JSON (dict or list)
+        return response.json()

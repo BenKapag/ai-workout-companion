@@ -1,14 +1,16 @@
-from fastapi import APIRouter, HTTPException, Depends, Path
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, Depends, Path, Query
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from db_connection import get_db
 from models import WorkoutPlan,WorkoutDay, WorkoutExercise, ExerciseCatalog
-from schemas.plan_schemas import WorkoutPlanResponse,WorkoutPlanCreate
+from schemas.plan_schemas import LastWorkoutPlanResponse,WorkoutPlanCreate,WorkoutPlanResponse
 from datetime import datetime
+from typing import List, Optional
+
 
 router = APIRouter()
 
-@router.get("/users/{user_id}/plans/last", response_model=WorkoutPlanResponse)
+@router.get("/users/{user_id}/plans/last", response_model=LastWorkoutPlanResponse)
 def get_latest_workout_plan_for_user(
     user_id: int = Path(..., description="ID of the user to fetch the latest workout plan for"),
     db: Session = Depends(get_db)
@@ -106,3 +108,68 @@ def create_workout_plan(plan_data: WorkoutPlanCreate, db: Session = Depends(get_
     db.commit()
 
     return {"message": "Workout plan created successfully", "plan_id": new_plan.id}
+
+
+
+
+@router.get("/workout-plans", response_model=List[WorkoutPlanResponse])
+def get_user_workout_plans(
+    user_id: int = Query(..., description="ID of the user"),
+    status: Optional[str] = Query(None, description="Filter by status: active or archived"),
+    db: Session = Depends(get_db)
+):
+    """
+    Returns all workout plans for a given user.
+    Supports optional filtering by status.
+    Includes nested days and exercises.
+    """
+    # Build base query
+    query = db.query(WorkoutPlan).options(
+        joinedload(WorkoutPlan.days).joinedload(WorkoutDay.exercises).joinedload(WorkoutExercise.catalogical_exercise)
+    ).filter(WorkoutPlan.user_id == user_id)
+
+    # Apply status filter if provided
+    if status:
+        query = query.filter(WorkoutPlan.status == status)
+
+    plans = query.order_by(WorkoutPlan.created_at.desc()).all()
+
+    if not plans:
+        raise HTTPException(status_code=404, detail="No workout plans found for this user")
+
+    # Build response manually for nested structure
+    response = []
+    for plan in plans:
+        plan_data = {
+            "id": plan.id,
+            "goal": plan.goal,
+            "experience_level": plan.experience_level,
+            "duration_weeks": plan.duration_weeks,
+            "created_at": plan.created_at.isoformat(),
+            "status": plan.status,
+            "days": []
+        }
+
+        for day in plan.days:
+            day_data = {
+                "day_number": day.day_number,
+                "day_name": day.day_name,
+                "focus": day.focus,
+                "exercises": []
+            }
+
+            for ex in day.exercises:
+                ex_in_catalog = ex.exercise_catalog
+                day_data["exercises"].append({
+                    "exercise_name": ex_in_catalog.name,
+                    "equipment": ex_in_catalog.equipment,
+                    "sets": ex.sets,
+                    "reps": ex.reps,
+                    "notes": ex.notes
+                })
+
+            plan_data["days"].append(day_data)
+
+        response.append(plan_data)
+
+    return response

@@ -152,9 +152,11 @@ class WorkoutExercise(Base):
     # Optional notes from the AI agent or backend
     notes = Column(String, nullable=True)  # e.g., "Focus on slow negatives", "Pause at bottom position"
 
-    # Relationships
+    # Relationships (many-to-one):
+    # - Many WorkoutExercises belong to one WorkoutDay
+    # - Many WorkoutExercises link to one ExerciseCatalog entry
     day = relationship("WorkoutDay", back_populates="exercises")
-    exercise = relationship("ExerciseCatalog", back_populates="workout_instances")
+    catalogical_exercise = relationship("ExerciseCatalog", back_populates="workout_instances")
 
 
 class ExerciseCatalog(Base):
@@ -186,5 +188,5 @@ class ExerciseCatalog(Base):
     # Relationship: One ExerciseCatalog entry -> Many WorkoutExercise instances
     workout_instances = relationship(
         "WorkoutExercise",
-        back_populates="exercise"
+        back_populates="catalogical_exercise"
     )
