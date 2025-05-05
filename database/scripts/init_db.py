@@ -2,7 +2,7 @@
 # This script creates all tables defined in models.py using SQLAlchemy
 
 from models import Base
-from database import engine
+from db_connection import engine
 from models import User, UserProfile, WorkoutPlan, WorkoutDay, WorkoutExercise, ExerciseCatalog  # all models we create in the database
 
 

@@ -2,7 +2,8 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from services.auth_dependency import get_current_user  # Dependency to extract current user from JWT token
-from services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan,save_workout_plan_to_db,db_service_get
+from services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan
+from services.db_service import save_workout_plan_to_db, db_service_get
 from schemas.plan_schemas import WorkoutPlanResponse,GeneratedPlanResponse
 import httpx
 from core.config import DB_SERVICE_URL
@@ -127,10 +128,25 @@ async def generate_workout_plan(
              detail="Failed to save the workout plan to the database."
     )
 
+    try:
+        created_plan = await db_service_get(f"/workout-plans/{created_plan_id}")
+        
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+        status_code=e.response.status_code,
+        detail=e.response.json().get("detail", str(e))
+    )
+    except Exception as e:
+        raise HTTPException(
+        status_code=502,
+        detail=f"Failed to fetch the saved workout plan: {str(e)}"
+    )
+
+
     #Return a success response to the frontend
     return {"message": "Workout plan generated and saved successfully!",
-            "plan_id": created_plan_id,
-            "plan": generated_plan}
+            "plan_id":created_plan_id,
+            "plan": created_plan}
 
 
 
@@ -163,3 +179,32 @@ async def get_user_plans(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+    
+
+
+@router.get("/plan/{plan_id}", response_model=WorkoutPlanResponse)
+async def get_plan_by_id(plan_id: int):
+    """
+    Fetch a specific workout plan by its ID.
+
+    - Calls the database microservice's /workout-plans/{plan_id} endpoint
+    - Returns the full nested plan structure (days, exercises, etc.)
+    - Raises 404 or 502 depending on error type
+    """
+    try:
+        return await db_service_get(f"/workout-plans/{plan_id}")
+    
+    except httpx.HTTPStatusError as e:
+        # Propagate status from the DB microservice (e.g. 404)
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=e.response.json().get("detail", str(e))
+        )
+    
+    except Exception as e:
+        # Fallback for any unexpected error
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to fetch workout plan: {str(e)}"
+        )

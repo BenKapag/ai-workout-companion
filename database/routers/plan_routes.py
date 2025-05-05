@@ -6,6 +6,7 @@ from models import WorkoutPlan,WorkoutDay, WorkoutExercise, ExerciseCatalog
 from schemas.plan_schemas import LastWorkoutPlanResponse,WorkoutPlanCreate,WorkoutPlanResponse
 from datetime import datetime
 from typing import List, Optional
+from services.serializers import serialize_plan
 
 
 router = APIRouter()
@@ -137,39 +138,33 @@ def get_user_workout_plans(
     if not plans:
         raise HTTPException(status_code=404, detail="No workout plans found for this user")
 
-    # Build response manually for nested structure
-    response = []
-    for plan in plans:
-        plan_data = {
-            "id": plan.id,
-            "goal": plan.goal,
-            "experience_level": plan.experience_level,
-            "duration_weeks": plan.duration_weeks,
-            "created_at": plan.created_at.isoformat(),
-            "status": plan.status,
-            "days": []
-        }
 
-        for day in plan.days:
-            day_data = {
-                "day_number": day.day_number,
-                "day_name": day.day_name,
-                "focus": day.focus,
-                "exercises": []
-            }
+    return [serialize_plan(plan) for plan in plans]
 
-            for ex in day.exercises:
-                ex_in_catalog = ex.exercise_catalog
-                day_data["exercises"].append({
-                    "exercise_name": ex_in_catalog.name,
-                    "equipment": ex_in_catalog.equipment,
-                    "sets": ex.sets,
-                    "reps": ex.reps,
-                    "notes": ex.notes
-                })
 
-            plan_data["days"].append(day_data)
+@router.get("/workout-plans/{plan_id}", response_model=WorkoutPlanResponse)
+def get_workout_plan_by_id(plan_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve a single workout plan by its unique ID.
 
-        response.append(plan_data)
+    - Includes nested workout days, exercises, and catalog details.
+    - Returns the full structured response as defined by WorkoutPlanResponse.
+    - If no plan is found with the given ID, returns 404.
+    """
 
-    return response
+    # Query the database for the workout plan, eager-loading all related data:
+    # - Workout days (WorkoutDay)
+    # - Exercises for each day (WorkoutExercise)
+    # - Catalog details for each exercise (ExerciseCatalog)
+    plan = db.query(WorkoutPlan).options(
+        joinedload(WorkoutPlan.days)
+        .joinedload(WorkoutDay.exercises)
+        .joinedload(WorkoutExercise.catalogical_exercise)
+    ).filter(WorkoutPlan.id == plan_id).first()
+
+    # Return 404 if no such plan exists
+    if not plan:
+        raise HTTPException(status_code=404, detail="Workout plan not found")
+
+    # Serialize the ORM object into a nested response dict
+    return serialize_plan(plan)

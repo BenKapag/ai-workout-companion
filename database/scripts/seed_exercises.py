@@ -6,7 +6,7 @@
 # ---------------------------------------------
 
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from db_connection import SessionLocal
 from models import ExerciseCatalog
 
 
