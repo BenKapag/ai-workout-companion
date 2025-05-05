@@ -177,8 +177,15 @@ async def get_user_plans(
         response = await db_service_get(f"/workout-plans{query_string}")
         return response
 
+    except httpx.HTTPStatusError as e:
+        # Pass through status + message from DB microservice (e.g. 404)
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=e.response.json().get("detail", str(e))
+        )
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=502, detail=f"Failed to fetch plans: {str(e)}")
     
     
 

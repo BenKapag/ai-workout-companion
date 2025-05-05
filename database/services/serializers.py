@@ -13,7 +13,7 @@ def serialize_plan(plan: WorkoutPlan) -> Dict:
         "duration_weeks": plan.duration_weeks,
         "status": plan.status,
         "experience_level": plan.experience_level,
-        "created_at": plan.created_at,
+        "created_at": plan.created_at.isoformat() if plan.created_at else None,
         "days": [
             {
                 "day_number": day.day_number,

@@ -51,7 +51,7 @@ class WorkoutPlanResponse(BaseModel):
     goal: Optional[str]
     experience_level: Optional[str]
     duration_weeks: Optional[int]
-    created_at: str
+    created_at: datetime
     status: str
     days: List[WorkoutDayResponse]
 
