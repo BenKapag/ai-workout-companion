@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Path, Query
+from fastapi import APIRouter, HTTPException, Depends, Path, Query, status
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from db_connection import get_db
@@ -168,3 +168,23 @@ def get_workout_plan_by_id(plan_id: int, db: Session = Depends(get_db)):
 
     # Serialize the ORM object into a nested response dict
     return serialize_plan(plan)
+
+
+
+@router.delete("/workout-plans/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_workout_plan(plan_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a workout plan by ID.
+
+    - Also deletes related workout days and exercises via CASCADE
+    - Returns 204 on success
+    - Returns 404 if plan does not exist
+    """
+    # Fetch the plan by ID
+    plan = db.query(WorkoutPlan).filter(WorkoutPlan.id == plan_id).first()
+
+    if not plan:
+        raise HTTPException(status_code=404, detail="Workout plan not found")
+
+    db.delete(plan)
+    db.commit()

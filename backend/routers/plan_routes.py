@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from services.auth_dependency import get_current_user  # Dependency to extract current user from JWT token
 from services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan
-from services.db_service import save_workout_plan_to_db, db_service_get
+from services.db_service import save_workout_plan_to_db, db_service_get, db_service_delete
 from schemas.plan_schemas import WorkoutPlanResponse,GeneratedPlanResponse
 import httpx
 from core.config import DB_SERVICE_URL
@@ -215,3 +215,35 @@ async def get_plan_by_id(plan_id: int):
             status_code=502,
             detail=f"Failed to fetch workout plan: {str(e)}"
         )
+
+
+@router.delete("/plan/{plan_id}",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_plan_by_id(plan_id: int,username: str = Depends(get_current_user)):
+
+    """
+    Deletes a workout plan for the authenticated user.
+
+    - Forwards the request to the database microservice
+    - Returns 204 No Content on success
+    - Returns 404 if plan not found
+    - Returns 502 on unexpected failure
+    (we can improve it in the future and make a safety check that the plan really belongs to the specific username)
+    """
+
+    try:
+        await db_service_delete(f"/workout-plans/{plan_id}")
+    
+    except httpx.HTTPStatusError as e:
+        # Propagate status from the DB microservice (e.g. 404)
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=e.response.json().get("detail", str(e))
+        )
+    
+    except Exception as e:
+        # Fallback for any unexpected error
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to delete workout plan: {str(e)}"
+        )
+

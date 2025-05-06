@@ -131,3 +131,23 @@ async def db_service_get(endpoint: str):
 
         # Parse and return the response body as JSON (dict or list)
         return response.json()
+    
+
+
+async def db_service_delete(endpoint: str) -> None:
+     
+     """
+    Sends a DELETE request to the database microservice.
+
+    - Raises httpx.HTTPStatusError if the response is 4xx or 5xx
+    - Raises other exceptions for network failures
+    """
+     
+     # Build the full URL safely to avoid double slashes   
+     url = f"{DB_SERVICE_URL.rstrip('/')}/{endpoint.lstrip('/')}"
+
+     # Use async HTTP client to send the delete request
+     async with httpx.AsyncClient() as client:
+         response = await client.delete(url)
+        # Raise an exception if the status code is 4xx or 5xx
+         response.raise_for_status()
