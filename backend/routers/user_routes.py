@@ -42,7 +42,7 @@ async def register_user(user: RegisterRequest):
             raise HTTPException(status_code=response.status_code, detail=error_message["detail"])
 
         # Parse the DB service response into our Pydantic response model
-        response_data = response.json()
+        response_data = await response.json()
         return RegisterResponse(**response_data)
 
     except httpx.RequestError as e:
@@ -68,7 +68,7 @@ async def login_user(login_credentials: LoginRequest):
             raise HTTPException(status_code=404, detail="User not found")
 
         # Parse the JSON response from the DB (must contain hashed password)
-        user_data = response.json()
+        user_data = await response.json()
 
         # Verify the password using bcrypt
         if not verify_password(login_credentials.password, user_data["hashed_password"]):
@@ -117,14 +117,14 @@ async def get_profile(current_user: str = Depends(get_current_user)):
         if response.status_code != 200:
             # Attempt to extract a clear error message from the DB response
             try:
-                detail = response.json().get("detail", "Unknown error from DB service")
+                detail = (await response.json()).get("detail", "Unknown error from DB service")
             except ValueError:
                 detail = response.text  # Non-JSON response fallback
 
             raise HTTPException(status_code=response.status_code, detail=detail)
 
         # Profile found — return the response data as-is
-        return response.json()
+        return await response.json()
 
     except httpx.RequestError as e:
         # Network issue, DB microservice is unreachable or timed out
