@@ -4,7 +4,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from services.token_service import SECRET_KEY, ALGORITHM
+from app.services.token_service import SECRET_KEY, ALGORITHM
 
 # FastAPI will automatically look for an Authorization header like: "Bearer <token>"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")

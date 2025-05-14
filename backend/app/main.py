@@ -2,7 +2,7 @@
 # Entry point for the FastAPI application
 
 from fastapi import FastAPI
-from routers import user_routes,plan_routes  # Import user routes
+from app.routers import user_routes,plan_routes  # Import user routes
 
 # Create the FastAPI app instance
 app = FastAPI()

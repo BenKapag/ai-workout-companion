@@ -1,12 +1,12 @@
 # routers/plan_routes.py
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from services.auth_dependency import get_current_user  # Dependency to extract current user from JWT token
-from services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan
-from services.db_service import save_workout_plan_to_db, db_service_get, db_service_delete
-from schemas.plan_schemas import WorkoutPlanResponse,GeneratedPlanResponse
+from app.services.auth_dependency import get_current_user  # Dependency to extract current user from JWT token
+from app.services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan
+from app.services.db_service import save_workout_plan_to_db, db_service_get, db_service_delete
+from app.schemas.plan_schemas import WorkoutPlanResponse,GeneratedPlanResponse
 import httpx
-from core.config import DB_SERVICE_URL
+from app.core.config import DB_SERVICE_URL
 import copy
 from typing import Optional,List
 

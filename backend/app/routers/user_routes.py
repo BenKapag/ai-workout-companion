@@ -1,14 +1,14 @@
 # routers/user_routes.py
 
 from fastapi import APIRouter, HTTPException,Depends,status
-from schemas.auth_schemas import RegisterRequest,RegisterResponse,LoginRequest,TokenLoginResponse
-from schemas.user_profile_schemas import UserProfileCreate,UserProfileResponse
+from app.schemas.auth_schemas import RegisterRequest,RegisterResponse,LoginRequest,TokenLoginResponse
+from app.schemas.user_profile_schemas import UserProfileCreate,UserProfileResponse
 from passlib.context import CryptContext
-from services.token_service import create_access_token
-from services.auth_dependency import get_current_user
-from services.db_service import get_user_by_username,get_user_profile_by_id,update_user_profile
+from app.services.token_service import create_access_token
+from app.services.auth_dependency import get_current_user
+from app.services.db_service import get_user_by_username,get_user_profile_by_id,update_user_profile
 import httpx
-from core.config import DB_SERVICE_URL
+from app.core.config import DB_SERVICE_URL
 
 # Create the API router for user-related endpoints
 router = APIRouter()
