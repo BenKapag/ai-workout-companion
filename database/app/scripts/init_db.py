@@ -1,9 +1,9 @@
 # init_db.py
 # This script creates all tables defined in models.py using SQLAlchemy
 
-from models import Base
-from db_connection import engine
-from models import User, UserProfile, WorkoutPlan, WorkoutDay, WorkoutExercise, ExerciseCatalog  # all models we create in the database
+from app.models import Base
+from app.db_connection import engine
+from app.models import User, UserProfile, WorkoutPlan, WorkoutDay, WorkoutExercise, ExerciseCatalog  # all models we create in the database
 
 
 # Create all tables in the database

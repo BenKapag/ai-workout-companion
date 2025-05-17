@@ -3,10 +3,10 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Path,status
 from sqlalchemy.orm import Session
-from db_connection import SessionLocal,get_db
-from models import User, UserProfile
-from schemas.auth_schemas import UserCreate, UserResponse,UserInDB
-from schemas.user_profile_schemas import UserProfileCreate,UserProfileResponse
+from app.db_connection import SessionLocal,get_db
+from app.models import User, UserProfile
+from app.schemas.auth_schemas import UserCreate, UserResponse,UserInDB
+from app.schemas.user_profile_schemas import UserProfileCreate,UserProfileResponse
 from sqlalchemy import func
 
 # Create a router object to group user-related endpoints

@@ -1,5 +1,5 @@
 from typing import Dict
-from models import WorkoutPlan
+from app.models import WorkoutPlan
 from datetime import datetime
 
 def serialize_plan(plan: WorkoutPlan) -> Dict:

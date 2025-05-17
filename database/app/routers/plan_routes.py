@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, Depends, Path, Query, status
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
-from db_connection import get_db
-from models import WorkoutPlan,WorkoutDay, WorkoutExercise, ExerciseCatalog
-from schemas.plan_schemas import LastWorkoutPlanResponse,WorkoutPlanCreate,WorkoutPlanResponse
+from app.db_connection import get_db
+from app.models import WorkoutPlan,WorkoutDay, WorkoutExercise, ExerciseCatalog
+from app.schemas.plan_schemas import LastWorkoutPlanResponse,WorkoutPlanCreate,WorkoutPlanResponse
 from datetime import datetime
 from typing import List, Optional
-from services.serializers import serialize_plan
+from app.services.serializers import serialize_plan
 
 
 router = APIRouter()
