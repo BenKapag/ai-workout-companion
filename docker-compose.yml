@@ -1,6 +1,16 @@
 version: "3.9"
 
 services:
+
+  backend-service:
+    build:
+      context: ./backend # path to backend microservice Dockerfile
+    container_name: backend_service_container
+    ports:
+      - "8000:8000" # expose API on host
+    environment:
+      - DB_SERVICE_URL=http://database-service:8001
+
   db:  # service name for database
     image: postgres:14
     container_name: db_container  
@@ -13,5 +23,17 @@ services:
     ports:
       - "5432:5432"  # Make the DB accessible to the local machine
 
+  database-service:
+    build:
+      context: ./database  # path to database microservice Dockerfile
+    container_name: database_service_container
+    ports:
+      - "8001:8001"  # expose API on host
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/workout_db
+
+
 volumes:
-  postgres_data:  # Volume declaration for persistent data
+    postgres_data:  # Volume declaration for persistent data

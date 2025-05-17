@@ -45,6 +45,7 @@ class WorkoutDayResponse(BaseModel):
     exercises: List[WorkoutExerciseResponse]
 
 class WorkoutPlanResponse(BaseModel):
+    id: int
     goal: Optional[str]
     experience_level: Optional[str]
     duration_weeks: Optional[int]
