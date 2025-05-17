@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 #Exercise inside a Workout Day
-class ExerciseInPlan(BaseModel):
+class WorkoutExercise(BaseModel):
     exercise_name: str
     equipment: Optional[str]
     sets: Optional[int]
@@ -15,18 +15,20 @@ class ExerciseInPlan(BaseModel):
 
 
 # Workout Day
-class WorkoutDayCreate(BaseModel):
+class WorkoutDay(BaseModel):
     day_number: int  # 1, 2, 3, etc.
     day_name: Optional[str] = None  # e.g., "Chest Day"
     focus: Optional[str] = None     # e.g., "Chest + Triceps"
-    exercises: List[ExerciseInPlan]
+    exercises: List[WorkoutExercise]
 
 # Full Workout Plan
-class WorkoutPlanCreate(BaseModel):
-    duration_weeks: Optional[int] = None  # Total duration of the plan
-    goal: Optional[str] = None             # e.g., "Muscle gain", "Fat loss"
+class WorkoutPlan(BaseModel):
+    goal: Optional[str] = None # e.g., "Muscle gain", "Fat loss"
     experience_level: Optional[str] = None # e.g., "Beginner", "Intermediate", "Advanced"
-    days: List[WorkoutDayCreate]
+    duration_weeks: Optional[int] = None  # Total duration of the plan             
+    created_at: str
+    status: str
+    days: List[WorkoutDay]
 
 
 # Workout Plan Response

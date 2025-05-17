@@ -26,3 +26,13 @@ class UserProfileResponse(BaseModel):
 
     class Config:
         from_attributes = True  # Enables automatic conversion (to json) from SQLAlchemy models
+
+#schema for user profile
+class UserProfile(BaseModel):
+    age: Optional[int] = None
+    height_cm: Optional[int] = None
+    weight_kg: Optional[int] = None
+    experience_level: Optional[str] = None
+    fitness_goal: Optional[str] = None
+    equipment: Optional[List[str]] = None # e.g., ["dumbbells", "resistance bands"]
+    health_notes: Optional[str] = None  

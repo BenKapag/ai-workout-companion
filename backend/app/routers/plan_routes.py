@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.services.auth_dependency import get_current_user  # Dependency to extract current user from JWT token
 from app.services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan
 from app.services.db_service import save_workout_plan_to_db, db_service_get, db_service_delete
+from app.services.ai_service import get_generated_plan_by_ai
 from app.schemas.plan_schemas import WorkoutPlanResponse,GeneratedPlanResponse
 import httpx
 from app.core.config import DB_SERVICE_URL
@@ -51,70 +52,8 @@ async def generate_workout_plan(
     last_plan = await get_latest_user_plan(user_id)
     # Note: last_plan might be None if it's a new user — that's OK
 
-    #(Temporary)!!!!!!! Mock AI Agent response
-    generated_plan = {
-    "duration_weeks": 8,
-    "goal": user_profile.get("fitness_goal", "General Fitness"),
-    "experience_level": user_profile.get("experience_level", "Beginner"),
-    "days": [
-        {
-            "day_number": 1,
-            "day_name": "Chest Day",
-            "focus": "Chest + Triceps",
-            "exercises": [
-                {
-                    "exercise_name": "Barbell Bench Press",
-                    "equipment": "Barbell",
-                    "sets": 4,
-                    "reps": 8,
-                    "notes": "Use full range of motion"
-                },
-                {
-                    "exercise_name": "Incline Dumbbell Press",
-                    "equipment": "Dumbbell",
-                    "sets": 3,
-                    "reps": 10,
-                    "notes": "Pause at the bottom"
-                },
-                {
-                    "exercise_name": "Triceps Pushdown",
-                    "equipment": "Cable Machine",
-                    "sets": 3,
-                    "reps": 12,
-                    "notes": None
-                }
-            ]
-        },
-        {
-            "day_number": 2,
-            "day_name": "Back Day",
-            "focus": "Back + Biceps",
-            "exercises": [
-                {
-                    "exercise_name": "Deadlift",
-                    "equipment": "Barbell",
-                    "sets": 4,
-                    "reps": 5,
-                    "notes": "Maintain straight back posture"
-                },
-                {
-                    "exercise_name": "Seated Row",
-                    "equipment": "Cable Machine",
-                    "sets": 3,
-                    "reps": 10,
-                    "notes": "Squeeze shoulder blades at end"
-                },
-                {
-                    "exercise_name": "Barbell Curl",
-                    "equipment": "Barbell",
-                    "sets": 3,
-                    "reps": 12,
-                    "notes": None
-                }
-            ]
-        }
-    ]
-}
+    #fetch the generated plan from the ai agent
+    generated_plan = await get_generated_plan_by_ai(user_profile,last_plan)
 
     #Save the generated plan into the database microservice
     payload = copy.deepcopy(generated_plan)
@@ -204,9 +143,10 @@ async def get_plan_by_id(plan_id: int):
     
     except httpx.HTTPStatusError as e:
         # Propagate status from the DB microservice (e.g. 404)
+        error_detail = await e.response.json()
         raise HTTPException(
             status_code=e.response.status_code,
-            detail=e.response.json().get("detail", str(e))
+            detail=error_detail.get("detail", str(e))
         )
     
     except Exception as e:
