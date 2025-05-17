@@ -1,0 +1,21 @@
+# Local virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Git and IDE files
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
+
+# Logs and temp files
+*.log
+*.sqlite3
+
+# Optional: exclude tests if not needed in image
+tests/
