@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "name": "Debug FastAPI (Uvicorn)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.main:app",        // <- adjust if it's not in app/main.py
+        "--reload",
+        "--host", "127.0.0.1",
+        "--port", "8000"
+      ],
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}/backend"     // ✅ because you're launching from project root
+    }
+  ]
+}

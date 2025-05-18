@@ -1,10 +1,10 @@
 # app/services/plan_generator.py
 
 from typing import Optional
-from app.schemas.plan_schemas import UserProfile, WorkoutPlan, WorkoutDay, WorkoutExercise
+from app.schemas.plan_schemas import UserProfile, WorkoutPlan, WorkoutDay, WorkoutExercise,LastWorkoutPlan
 from datetime import datetime
 
-def generate_plan(user: UserProfile, last_plan: Optional[WorkoutPlan]) -> WorkoutPlan:
+def generate_plan(user: UserProfile, last_plan: Optional[LastWorkoutPlan]) -> WorkoutPlan:
     """
     Generates a new workout plan based on user profile and (optionally) last plan.
 

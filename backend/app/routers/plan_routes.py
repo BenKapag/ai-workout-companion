@@ -10,6 +10,8 @@ import httpx
 from app.core.config import DB_SERVICE_URL
 import copy
 from typing import Optional,List
+import json
+
 
 # Initialize router for workout plan generation
 router = APIRouter()
@@ -58,6 +60,8 @@ async def generate_workout_plan(
     #Save the generated plan into the database microservice
     payload = copy.deepcopy(generated_plan)
     payload["user_id"] = user_id  # Attach the correct user ID
+
+    print("📦 Payload to DB:", json.dumps(payload, indent=2))
 
     created_plan_id  = await save_workout_plan_to_db(payload)
 

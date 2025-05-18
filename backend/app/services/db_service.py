@@ -101,7 +101,7 @@ async def save_workout_plan_to_db(plan_data: dict) -> int | None:
         async with httpx.AsyncClient() as client:
             response = await client.post(f"{DB_SERVICE_URL}/workout-plans", json=plan_data)
             response.raise_for_status()
-            return await response.json().get("plan_id")
+            return response.json().get("plan_id")
     except httpx.HTTPError as e:
         print(f"[ERROR] Failed to save workout plan: {e}")
         return None
@@ -130,7 +130,7 @@ async def db_service_get(endpoint: str):
         response.raise_for_status()
 
         # Parse and return the response body as JSON (dict or list)
-        return await response.json()
+        return response.json()
     
 
 

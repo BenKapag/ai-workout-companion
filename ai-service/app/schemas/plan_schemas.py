@@ -54,8 +54,21 @@ class WorkoutPlan(BaseModel):
     experience_level: Optional[str]
     duration_weeks: Optional[int]
     created_at: Optional[datetime]
-    status: str                           # e.g., "active", "archived"
+    status: Optional[str]                           # e.g., "active", "archived"
     days: List[WorkoutDay]
+
+# -------------------------------
+# User's last workout plan
+# -------------------------------
+class LastWorkoutPlan(BaseModel):
+    duration_weeks: Optional[int]
+    goal: Optional[str]  
+    experience_level: Optional[str]
+    status:str
+    created_at:datetime
+
+    class Config:
+        from_attributes = True      
 
 # -------------------------------
 # Full Request Schema to AI Service
@@ -67,4 +80,6 @@ class AIPlanRequest(BaseModel):
     Includes current user profile and (optionally) their last plan.
     """
     user_profile: UserProfile
-    last_plan: Optional[WorkoutPlan] = None
+    last_plan: Optional[LastWorkoutPlan] = None
+
+

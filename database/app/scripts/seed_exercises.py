@@ -51,6 +51,26 @@ seed_data = [
         "equipment": "Barbell",
         "primary_muscle": "Biceps",
         "difficulty": "Beginner"
+    },
+    {   "name": "Barbell Curl",
+        "equipment": "Barbell",
+        "primary_muscle": "Biceps",  
+        "difficulty": "Beginner"
+    },
+    {   "name": "Push Ups", 
+        "equipment": "Bodyweight", 
+        "primary_muscle": "Chest", 
+        "difficulty": "Beginner"
+    },
+    {   "name": "Plank", 
+        "equipment": "Bodyweight", 
+        "primary_muscle": "Core", 
+        "difficulty": "Beginner"
+    },
+    {   "name": "Dumbbell Squats", 
+        "equipment": "Dumbbell", 
+        "primary_muscle": "Legs", 
+        "difficulty": "Beginner"
     }
 ]
 

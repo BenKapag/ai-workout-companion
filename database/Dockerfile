@@ -17,5 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the code into the container
 COPY . .
 
+ENV PYTHONPATH=/app
+
 # Run the FastAPI app with uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["bash", "-c", "python app/scripts/setup_db.py && uvicorn app.main:app --host 0.0.0.0 --port 8001"]
+
+
