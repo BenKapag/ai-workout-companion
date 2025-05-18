@@ -1,0 +1,21 @@
+# Don't copy local virtualenv
+venv/
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore Git and IDE stuff
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
+
+# Ignore build logs and misc
+*.log
+*.sqlite3
+
+# Optional: exclude test files if not needed in container
+tests/
