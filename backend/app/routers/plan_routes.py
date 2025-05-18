@@ -61,8 +61,6 @@ async def generate_workout_plan(
     payload = copy.deepcopy(generated_plan)
     payload["user_id"] = user_id  # Attach the correct user ID
 
-    print("📦 Payload to DB:", json.dumps(payload, indent=2))
-
     created_plan_id  = await save_workout_plan_to_db(payload)
 
     if not created_plan_id:

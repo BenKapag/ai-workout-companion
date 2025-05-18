@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
 
@@ -10,6 +9,7 @@ services:
       - "8000:8000" # expose API on host
     environment:
       - DB_SERVICE_URL=http://database-service:8001
+      - AI_SERVICE_URL=http://ai-service:8002
 
   db:  # service name for database
     image: postgres:14
@@ -33,6 +33,13 @@ services:
       - db
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/workout_db
+
+  ai-service:
+    build:
+      context: ./ai-service # path to ai microservice Dockerfile
+    container_name: ai_service_container
+    ports:
+      - "8002:8002" # expose API on host
 
 
 volumes:
