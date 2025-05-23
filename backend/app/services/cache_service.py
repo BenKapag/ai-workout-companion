@@ -15,10 +15,7 @@ async def get_allowed_exercise_names() -> List[str]:
         List[str]: A list of valid exercise names to be used by the AI generator.
     """
     try:
-        exercises_dic = await db_service_get("/catalog-exercises")
-
-        # Assumes the response is a list of objects like: {"name": "Deadlift", ...}
-        return [exercise["name"] for exercise in exercises_dic]
+        return await db_service_get("/catalog-exercises/names")
 
     except httpx.HTTPStatusError as e:
         # Pass through status + message from DB microservice (e.g. 404)

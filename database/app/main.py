@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.db_connection import SessionLocal
 from app.routers.user_routes import router as user_router
 from app.routers.plan_routes import router as plan_router
+from app.routers.reference_data_routes import router as data_routes
 
 app = FastAPI(title="Database Microservice")
 
@@ -21,3 +22,4 @@ def health_check():
 # Register all routes from user_routes.py
 app.include_router(user_router)
 app.include_router(plan_router)
+app.include_router(data_routes)

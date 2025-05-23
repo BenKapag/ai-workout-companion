@@ -188,3 +188,5 @@ def delete_workout_plan(plan_id: int, db: Session = Depends(get_db)):
 
     db.delete(plan)
     db.commit()
+
+
