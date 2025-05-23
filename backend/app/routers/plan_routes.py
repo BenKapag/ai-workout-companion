@@ -5,6 +5,7 @@ from app.services.auth_dependency import get_current_user  # Dependency to extra
 from app.services.db_service import get_user_by_username, get_user_profile_by_id, get_latest_user_plan
 from app.services.db_service import save_workout_plan_to_db, db_service_get, db_service_delete
 from app.services.ai_service import get_generated_plan_by_ai
+from app.services.cache_service import get_allowed_exercise_names
 from app.schemas.plan_schemas import WorkoutPlanResponse,GeneratedPlanResponse
 import httpx
 from app.core.config import DB_SERVICE_URL
@@ -15,6 +16,7 @@ import json
 
 # Initialize router for workout plan generation
 router = APIRouter()
+
 
 @router.post("/generate-plan",response_model=GeneratedPlanResponse, status_code=status.HTTP_201_CREATED)
 async def generate_workout_plan(
@@ -54,12 +56,17 @@ async def generate_workout_plan(
     last_plan = await get_latest_user_plan(user_id)
     # Note: last_plan might be None if it's a new user — that's OK
 
+    #Fetch the allowed exercises name list to the ai agent
+    allowed_exercises = await get_allowed_exercise_names()
+
     #fetch the generated plan from the ai agent
-    generated_plan = await get_generated_plan_by_ai(user_profile,last_plan)
+    generated_plan = await get_generated_plan_by_ai(user_profile,last_plan,allowed_exercises)
 
     #Save the generated plan into the database microservice
     payload = copy.deepcopy(generated_plan)
     payload["user_id"] = user_id  # Attach the correct user ID
+
+    print("📦 Sending to DB:", json.dumps(payload, indent=2))
 
     created_plan_id  = await save_workout_plan_to_db(payload)
 

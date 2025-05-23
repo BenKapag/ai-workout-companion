@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Read the database connection URL from environment
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/workout_db")
 
 # Create the SQLAlchemy engine to connect to PostgreSQL
 # This engine manages the connection pool

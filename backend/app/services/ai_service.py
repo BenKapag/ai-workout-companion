@@ -3,10 +3,12 @@
 import httpx
 from app.schemas.user_profile_schemas import UserProfile
 from app.schemas.plan_schemas import WorkoutPlan
-from typing import Optional
+from typing import Optional,List
 from app.core.config import AI_SERVICE_URL 
 
-async def get_generated_plan_by_ai(user_profile: UserProfile,last_plan: Optional[WorkoutPlan]) -> WorkoutPlan:
+timeout = httpx.Timeout(30.0)
+
+async def get_generated_plan_by_ai(user_profile: UserProfile,last_plan: Optional[WorkoutPlan], allowed_exercises:List[str]) -> WorkoutPlan:
   """
   Retrieves generated workout plan from the AI microservice.
   Args:
@@ -22,11 +24,12 @@ async def get_generated_plan_by_ai(user_profile: UserProfile,last_plan: Optional
 
   payload = {
         "user_profile": user_profile,
-        "last_plan": last_plan
+        "last_plan": last_plan,
+        "allowed_exercises": allowed_exercises
     }
 
   # Use async HTTP client to send the request
-  async with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient(timeout=timeout) as client:
       
       response = await client.post(url, json = payload)
       # Raise an exception if the status code is 4xx or 5xx

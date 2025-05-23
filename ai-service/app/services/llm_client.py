@@ -3,6 +3,7 @@
 import os
 import json
 import openai
+import re
 from datetime import datetime
 from typing import Optional, List
 from dotenv import load_dotenv
@@ -60,14 +61,17 @@ def generate_plan_with_llm(
         "          \"exercise_name\": str,\n"
         "          \"equipment\": str,\n"
         "          \"sets\": int,\n"
-        "          \"reps\": int,\n"
+        "          \"reps\": int,  # Always a number. If the exercise is time-based, use the 'notes' field instead.\n"
         "          \"notes\": str (optional)\n"
         "        }\n"
         "      ]\n"
         "    }\n"
         "  ]\n"
         "}\n\n"
-        "⚠️ Only use exercise names from the list provided. Never invent names. Do not include any extra explanation."
+        "⚠️ STRICT RULES:\n"
+        "- Do NOT write time values (e.g., '60 seconds') in the 'reps' field. Use the 'notes' field instead.\n"
+        "- Do NOT invent exercise names. Only use exercises from the list provided.\n"
+        "- Return ONLY a JSON object — no explanations, markdown, or formatting around it."
     )
 
     # 📋 Build user prompt
@@ -102,6 +106,9 @@ def generate_plan_with_llm(
         f"{exercise_list_str}\n"
     )
 
+    print("✅ Sending prompt to LLM...")
+    print("🧠 Prompt message:\n", user_prompt)
+
     # 🧠 Call the LLM via OpenRouter
     response = openai.ChatCompletion.create(
         model="mistralai/mistral-7b-instruct",
@@ -116,12 +123,25 @@ def generate_plan_with_llm(
     # 🧪 Parse response
     response_text = response["choices"][0]["message"]["content"]
 
+    print("⬅️ Raw LLM response:\n", response_text)
+
+    cleaned_response = re.sub(
+    r'"reps":\s*(\d+)\s*seconds',
+    r'"reps": 1,\n          "notes": "Hold for \1 seconds"',
+    response_text
+    )
+
     try:
-        plan_dict = json.loads(response_text)
+        plan_dict = json.loads(cleaned_response)
+        print("✅ JSON parsed successfully.")
     except json.JSONDecodeError:
+        print("❌ Failed to parse JSON from LLM!")
+        print("❌ LLM Raw output:", response_text)
         raise ValueError("❌ LLM returned invalid JSON:\n" + response_text)
 
     try:
         return WorkoutPlan(**plan_dict)
     except Exception as e:
+        print("❌ JSON did not match WorkoutPlan schema!")
+        print("❌ Parsed dict:", plan_dict)
         raise ValueError(f"❌ JSON structure mismatch with WorkoutPlan schema:\n{e}\n\nRaw output:\n{plan_dict}")

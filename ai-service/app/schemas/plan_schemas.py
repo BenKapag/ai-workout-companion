@@ -81,5 +81,7 @@ class AIPlanRequest(BaseModel):
     """
     user_profile: UserProfile
     last_plan: Optional[LastWorkoutPlan] = None
+    allowed_exercises: List[str]
+
 
 
