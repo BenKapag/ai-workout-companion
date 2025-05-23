@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException
 from app.schemas.plan_schemas import AIPlanRequest, WorkoutPlan
-from app.services.plan_generator import generate_plan_with_llm
+from app.services.llm_client import generate_plan_with_llm
 
 router = APIRouter()
 

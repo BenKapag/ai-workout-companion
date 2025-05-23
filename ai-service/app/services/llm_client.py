@@ -5,6 +5,7 @@ import json
 import openai
 from datetime import datetime
 from typing import Optional, List
+from dotenv import load_dotenv
 
 from app.schemas.plan_schemas import (
     UserProfile,
@@ -12,8 +13,11 @@ from app.schemas.plan_schemas import (
     WorkoutPlan
 )
 
+# Load environment variables from .env file
+load_dotenv()
+
 # OpenRouter API setup
-openai.api_key = os.getenv("OPENROUTER_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_base = "https://openrouter.ai/api/v1"
 
 
@@ -106,7 +110,7 @@ def generate_plan_with_llm(
             {"role": "user", "content": user_prompt}
         ],
         temperature=0,
-        max_tokens=1200
+        max_tokens=2000
     )
 
     # 🧪 Parse response
