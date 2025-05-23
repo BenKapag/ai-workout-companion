@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException
 from app.schemas.plan_schemas import AIPlanRequest, WorkoutPlan
-from app.services.plan_generator import generate_plan
+from app.services.plan_generator import generate_plan_with_llm
 
 router = APIRouter()
 
@@ -23,7 +23,9 @@ def generate_workout_plan(request_data:AIPlanRequest):
 
     try:
         # Call the core logic to generate a new plan
-        new_plan = generate_plan(request_data.user_profile, request_data.last_plan)
+        new_plan = generate_plan_with_llm(request_data.user_profile, request_data.last_plan,["Barbell Bench Press", 
+        "Incline Dumbbell Press", "Triceps Pushdown", "Deadlift", "Seated Row", 
+        "Barbell Curl", "Push Ups", "Plank", "Dumbbell Squats"])
         return new_plan
 
     except Exception as e:
