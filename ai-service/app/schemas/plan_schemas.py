@@ -1,6 +1,6 @@
 # plan_schemas.py
 
-from typing import List, Optional
+from typing import List, Optional,Tuple
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -81,7 +81,7 @@ class AIPlanRequest(BaseModel):
     """
     user_profile: UserProfile
     last_plan: Optional[LastWorkoutPlan] = None
-    allowed_exercises: List[str]
+    allowed_exercises: List[Tuple[str,str]]
 
 
 

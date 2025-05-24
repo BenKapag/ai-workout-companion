@@ -5,7 +5,7 @@ import json
 import openai
 import re
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from dotenv import load_dotenv
 
 from app.schemas.plan_schemas import (
@@ -22,59 +22,66 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_base = "https://openrouter.ai/api/v1"
 
 
+
 def generate_plan_with_llm(
     user: UserProfile,
     last_plan: Optional[LastWorkoutPlan],
-    allowed_exercises: List[str]
+    allowed_exercises: List[Tuple[str, str]]
 ) -> WorkoutPlan:
     """
     Generates a new WorkoutPlan using OpenRouter-hosted LLM,
     based on the user's profile, last plan (if exists), and
-    a list of allowed exercise names from the Exercise Catalog.
+    a list of allowed exercise (name, equipment) pairs.
 
     Args:
         user (UserProfile): The user's profile.
         last_plan (LastWorkoutPlan | None): Previous plan for context.
-        allowed_exercises (List[str]): List of valid exercise names.
+        allowed_exercises (List[Tuple[str, str]]): Valid exercises.
 
     Returns:
-        WorkoutPlan: A new plan that adheres to the schema and only uses valid exercises.
+        WorkoutPlan: A new plan that adheres to the schema and uses only valid exercises.
     """
 
-    # ✍️ System message: define format and rules
+    # ✍️ System instructions
     system_prompt = (
-        "You are a professional fitness AI. Your job is to generate structured, personalized workout plans.\n"
-        "You MUST return ONLY a valid JSON object in this format:\n\n"
-        "{\n"
-        "  \"goal\": str,\n"
-        "  \"experience_level\": str,\n"
-        "  \"duration_weeks\": int,\n"
-        "  \"created_at\": str (ISO format),\n"
-        "  \"status\": str,\n"
-        "  \"days\": [\n"
-        "    {\n"
-        "      \"day_number\": int,\n"
-        "      \"day_name\": str,\n"
-        "      \"focus\": str,\n"
-        "      \"exercises\": [\n"
-        "        {\n"
-        "          \"exercise_name\": str,\n"
-        "          \"equipment\": str,\n"
-        "          \"sets\": int,\n"
-        "          \"reps\": int,  # Always a number. If the exercise is time-based, use the 'notes' field instead.\n"
-        "          \"notes\": str (optional)\n"
-        "        }\n"
-        "      ]\n"
-        "    }\n"
-        "  ]\n"
-        "}\n\n"
-        "⚠️ STRICT RULES:\n"
-        "- Do NOT write time values (e.g., '60 seconds') in the 'reps' field. Use the 'notes' field instead.\n"
-        "- Do NOT invent exercise names. Only use exercises from the list provided.\n"
-        "- Return ONLY a JSON object — no explanations, markdown, or formatting around it."
-    )
+    "You are a professional fitness AI. Your job is to generate structured, personalized workout plans.\n"
+    "You MUST return ONLY a valid JSON object in the exact format below. Do NOT include any explanation, markdown, or comments.\n\n"
+    "Rules:\n"
+    "- The plan must include exactly 7 days.\n"
+    "- On rest days, the 'exercises' field must be an empty list [].\n"
+    "- On training days, include 2 to 4 exercises.\n"
+    "- Each exercise must include: 'exercise_name', 'equipment', 'sets', 'reps', and 'notes'.\n"
+    "- The 'notes' field must contain useful info (e.g., rest time, form tip, tempo).\n"
+    "- Only use exercises from the provided list. Do NOT invent new exercise names.\n\n"
+    "Return JSON object in this format:\n"
+    "{\n"
+    "  \"goal\": \"string\",\n"
+    "  \"experience_level\": \"string\",\n"
+    "  \"duration_weeks\": integer,\n"
+    "  \"created_at\": \"ISO 8601 datetime string\",\n"
+    "  \"status\": \"string\",\n"
+    "  \"days\": [\n"
+    "    {\n"
+    "      \"day_number\": integer,\n"
+    "      \"day_name\": \"string\",\n"
+    "      \"focus\": \"string\",\n"
+    "      \"exercises\": [\n"
+    "        {\n"
+    "          \"exercise_name\": \"string\",\n"
+    "          \"equipment\": \"string\",\n"
+    "          \"sets\": integer,\n"
+    "          \"reps\": integer,\n"
+    "          \"notes\": \"string\"\n"
+    "        }\n"
+    "      ]\n"
+    "    }\n"
+    "  ]\n"
+    "}\n"
+)
 
-    # 📋 Build user prompt
+
+
+    # 📋 User profile
     user_prompt = (
         f"User profile:\n"
         f"- Age: {user.age}\n"
@@ -86,6 +93,7 @@ def generate_plan_with_llm(
         f"- Health notes: {user.health_notes or 'None'}\n\n"
     )
 
+    # 📚 Previous plan (if any)
     if last_plan:
         user_prompt += (
             "Previous plan details:\n"
@@ -99,17 +107,17 @@ def generate_plan_with_llm(
     else:
         user_prompt += "This is the user's first plan.\n\n"
 
-    # 📌 Add exercise constraint
-    exercise_list_str = ", ".join(allowed_exercises[:50])  # Limit to top 50 to avoid prompt bloat
-    user_prompt += (
-        "⚠️ Only choose exercise names from this list:\n"
-        f"{exercise_list_str}\n"
+    # ✅ Format allowed exercises
+    formatted_exercises = "\n".join(
+        [f"- {name} (Equipment: {equipment})" for name, equipment in allowed_exercises[:50]]
     )
 
-    print("✅ Sending prompt to LLM...")
-    print("🧠 Prompt message:\n", user_prompt)
+    user_prompt += (
+        "⚠️ Only choose exercises from this list:\n"
+        f"{formatted_exercises}\n"
+    )
 
-    # 🧠 Call the LLM via OpenRouter
+    # 🧠 Call the LLM
     response = openai.ChatCompletion.create(
         model="mistralai/mistral-7b-instruct",
         messages=[
@@ -120,28 +128,20 @@ def generate_plan_with_llm(
         max_tokens=2000
     )
 
-    # 🧪 Parse response
     response_text = response["choices"][0]["message"]["content"]
 
     print("⬅️ Raw LLM response:\n", response_text)
 
-    cleaned_response = re.sub(
-    r'"reps":\s*(\d+)\s*seconds',
-    r'"reps": 1,\n          "notes": "Hold for \1 seconds"',
-    response_text
-    )
-
     try:
-        plan_dict = json.loads(cleaned_response)
+        plan_dict = json.loads(response_text)
         print("✅ JSON parsed successfully.")
     except json.JSONDecodeError:
         print("❌ Failed to parse JSON from LLM!")
-        print("❌ LLM Raw output:", response_text)
         raise ValueError("❌ LLM returned invalid JSON:\n" + response_text)
 
     try:
         return WorkoutPlan(**plan_dict)
     except Exception as e:
         print("❌ JSON did not match WorkoutPlan schema!")
-        print("❌ Parsed dict:", plan_dict)
         raise ValueError(f"❌ JSON structure mismatch with WorkoutPlan schema:\n{e}\n\nRaw output:\n{plan_dict}")
+

@@ -15,7 +15,7 @@ def generate_workout_plan(request_data:AIPlanRequest):
     uses the AI agent to generate a new plan, and returns it.
 
     Args:
-        request_data (AIPlanRequest): Includes user_profile and last_plan (optional)
+        request_data (AIPlanRequest): Includes user_profile and last_plan (optional) and list of tuples (exercise name,equipment)
 
     Returns:
         WorkoutPlan: The AI-generated workout plan

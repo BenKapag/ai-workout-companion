@@ -56,7 +56,7 @@ async def generate_workout_plan(
     last_plan = await get_latest_user_plan(user_id)
     # Note: last_plan might be None if it's a new user — that's OK
 
-    #Fetch the allowed exercises name list to the ai agent
+    #Fetch the allowed exercises name and equipment list to the ai agent
     allowed_exercises = await get_allowed_exercise_names()
 
     #fetch the generated plan from the ai agent

@@ -3,17 +3,21 @@
 import httpx
 from app.schemas.user_profile_schemas import UserProfile
 from app.schemas.plan_schemas import WorkoutPlan
-from typing import Optional,List
+from typing import Optional,List,Tuple
 from app.core.config import AI_SERVICE_URL 
 
 timeout = httpx.Timeout(30.0)
 
-async def get_generated_plan_by_ai(user_profile: UserProfile,last_plan: Optional[WorkoutPlan], allowed_exercises:List[str]) -> WorkoutPlan:
+async def get_generated_plan_by_ai(
+user_profile: UserProfile,
+last_plan: Optional[WorkoutPlan], 
+allowed_exercises:List[Tuple[str, str]]) -> WorkoutPlan:
   """
   Retrieves generated workout plan from the AI microservice.
   Args:
         user_profile: include user profile
         last_plan(optional): include the last user plan
+        allowed_exercises: include List of Tuples (pairs) in the form of (exercise name,equipment)
 
     Returns:
         WorkoutPlan: The AI-generated workout plan
