@@ -2,7 +2,7 @@
 # ai_service/app/services/prompt_templates.py
 
 
-system_prompt_generate_plan = """
+system_prompt_generate_plan = (
     "You are a professional fitness AI. Your job is to generate structured, personalized workout plans.\n"
     "You MUST return ONLY a valid JSON object in the exact format below. Do NOT include any explanation, markdown, or comments.\n\n"
     "Rules:\n"
@@ -38,5 +38,4 @@ system_prompt_generate_plan = """
     "    }\n"
     "  ]\n"
     "}"
-
-"""
+)
