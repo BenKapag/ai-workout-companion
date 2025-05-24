@@ -82,7 +82,8 @@ class WorkoutPlan(Base):
     days = relationship(
         "WorkoutDay",
         back_populates="plan",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        order_by="WorkoutDay.day_number"
     )
 
 

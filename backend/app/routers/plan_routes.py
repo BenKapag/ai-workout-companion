@@ -152,7 +152,7 @@ async def get_plan_by_id(plan_id: int):
     
     except httpx.HTTPStatusError as e:
         # Propagate status from the DB microservice (e.g. 404)
-        error_detail = await e.response.json()
+        error_detail = e.response.json()
         raise HTTPException(
             status_code=e.response.status_code,
             detail=error_detail.get("detail", str(e))

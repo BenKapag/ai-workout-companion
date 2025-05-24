@@ -42,6 +42,45 @@ def generate_plan_with_llm(
         WorkoutPlan: A new plan that adheres to the schema and uses only valid exercises.
     """
 
+    system_prompt = (
+    "You are a professional fitness AI. Your job is to generate structured, personalized workout plans.\n"
+    "You MUST return ONLY a valid JSON object in the exact format below. Do NOT include any explanation, markdown, or comments.\n\n"
+    "Rules:\n"
+    "- The plan must include exactly 7 days.\n"
+    "- On rest days, the 'exercises' field must be an empty list [].\n"
+    "- On training days, include 2 to 4 exercises.\n"
+    "- Each exercise must include: 'exercise_name', 'equipment', 'sets', 'reps', and 'notes'.\n"
+    "- The 'reps' field must always be an integer (e.g., 10). For time-based exercises like plank, set 'reps' to 1 and describe the duration in 'notes'.\n"
+    "- The 'notes' field must include rest time, form tips, or tempo guidance.\n"
+    "- Only use exercises from the provided list. Do NOT invent new exercise names.\n"
+    "- Do NOT include any introductory text, markdown (like ```json), or explanations. Only return pure JSON.\n\n"
+    "Return JSON object in this exact format:\n"
+    "{\n"
+    "  \"goal\": \"string\",\n"
+    "  \"experience_level\": \"string\",\n"
+    "  \"duration_weeks\": integer,\n"
+    "  \"created_at\": \"ISO 8601 datetime string\",\n"
+    "  \"status\": \"string\",\n"
+    "  \"days\": [\n"
+    "    {\n"
+    "      \"day_number\": integer,\n"
+    "      \"day_name\": \"string\",\n"
+    "      \"focus\": \"string\",\n"
+    "      \"exercises\": [\n"
+    "        {\n"
+    "          \"exercise_name\": \"string\",\n"
+    "          \"equipment\": \"string\",\n"
+    "          \"sets\": integer,\n"
+    "          \"reps\": integer,\n"
+    "          \"notes\": \"string\"\n"
+    "        }\n"
+    "      ]\n"
+    "    }\n"
+    "  ]\n"
+    "}"
+)
+
+
 
     # 📋 User profile
     user_prompt = (
@@ -83,7 +122,7 @@ def generate_plan_with_llm(
     response = openai.ChatCompletion.create(
         model="mistralai/mistral-7b-instruct",
         messages=[
-            {"role": "system", "content": system_prompt_generate_plan},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
         temperature=0,
