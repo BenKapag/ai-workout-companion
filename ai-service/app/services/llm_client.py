@@ -80,7 +80,7 @@ def generate_plan_with_llm(
 
     # Call the LLM
     response = openai.ChatCompletion.create(
-        model="mistralai/mistral-7b-instruct",
+        model="mistralai/mistral-7b-instruct:free",
         messages=[
             {"role": "system", "content": system_prompt_generate_plan},
             {"role": "user", "content": user_prompt}
