@@ -82,7 +82,7 @@ def generate_plan_with_llm(
 
 
 
-    # 📋 User profile
+    # User profile
     user_prompt = (
         f"User profile:\n"
         f"- Age: {user.age}\n"
@@ -94,7 +94,7 @@ def generate_plan_with_llm(
         f"- Health notes: {user.health_notes or 'None'}\n\n"
     )
 
-    # 📚 Previous plan (if any)
+    # Previous plan (if any)
     if last_plan:
         user_prompt += (
             "Previous plan details:\n"
@@ -108,7 +108,7 @@ def generate_plan_with_llm(
     else:
         user_prompt += "This is the user's first plan.\n\n"
 
-    # ✅ Format allowed exercises
+    # Format allowed exercises
     formatted_exercises = "\n".join(
         [f"- {name} (Equipment: {equipment})" for name, equipment in allowed_exercises[:50]]
     )
@@ -118,7 +118,7 @@ def generate_plan_with_llm(
         f"{formatted_exercises}\n"
     )
 
-    # 🧠 Call the LLM
+    # Call the LLM
     response = openai.ChatCompletion.create(
         model="mistralai/mistral-7b-instruct",
         messages=[
@@ -131,18 +131,18 @@ def generate_plan_with_llm(
 
     response_text = response["choices"][0]["message"]["content"]
 
-    print("⬅️ Raw LLM response:\n", response_text)
+    print("Raw LLM response:\n", response_text)
 
     try:
         plan_dict = json.loads(response_text)
-        print("✅ JSON parsed successfully.")
+        print("JSON parsed successfully.")
     except json.JSONDecodeError:
-        print("❌ Failed to parse JSON from LLM!")
-        raise ValueError("❌ LLM returned invalid JSON:\n" + response_text)
+        print("Failed to parse JSON from LLM!")
+        raise ValueError("LLM returned invalid JSON:\n" + response_text)
 
     try:
         return WorkoutPlan(**plan_dict)
     except Exception as e:
-        print("❌ JSON did not match WorkoutPlan schema!")
-        raise ValueError(f"❌ JSON structure mismatch with WorkoutPlan schema:\n{e}\n\nRaw output:\n{plan_dict}")
+        print("JSON did not match WorkoutPlan schema!")
+        raise ValueError(f"JSON structure mismatch with WorkoutPlan schema:\n{e}\n\nRaw output:\n{plan_dict}")
 
