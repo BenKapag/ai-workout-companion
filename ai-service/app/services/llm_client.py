@@ -3,10 +3,10 @@
 import os
 import json
 import openai
-import re
 from datetime import datetime
 from typing import Optional, List, Tuple
 from dotenv import load_dotenv
+from app.services.prompt_templates import system_prompt_generate_plan
 
 from app.schemas.plan_schemas import (
     UserProfile,
@@ -41,44 +41,6 @@ def generate_plan_with_llm(
     Returns:
         WorkoutPlan: A new plan that adheres to the schema and uses only valid exercises.
     """
-
-    # ✍️ System instructions
-    system_prompt = (
-    "You are a professional fitness AI. Your job is to generate structured, personalized workout plans.\n"
-    "You MUST return ONLY a valid JSON object in the exact format below. Do NOT include any explanation, markdown, or comments.\n\n"
-    "Rules:\n"
-    "- The plan must include exactly 7 days.\n"
-    "- On rest days, the 'exercises' field must be an empty list [].\n"
-    "- On training days, include 2 to 4 exercises.\n"
-    "- Each exercise must include: 'exercise_name', 'equipment', 'sets', 'reps', and 'notes'.\n"
-    "- The 'notes' field must contain useful info (e.g., rest time, form tip, tempo).\n"
-    "- Only use exercises from the provided list. Do NOT invent new exercise names.\n\n"
-    "Return JSON object in this format:\n"
-    "{\n"
-    "  \"goal\": \"string\",\n"
-    "  \"experience_level\": \"string\",\n"
-    "  \"duration_weeks\": integer,\n"
-    "  \"created_at\": \"ISO 8601 datetime string\",\n"
-    "  \"status\": \"string\",\n"
-    "  \"days\": [\n"
-    "    {\n"
-    "      \"day_number\": integer,\n"
-    "      \"day_name\": \"string\",\n"
-    "      \"focus\": \"string\",\n"
-    "      \"exercises\": [\n"
-    "        {\n"
-    "          \"exercise_name\": \"string\",\n"
-    "          \"equipment\": \"string\",\n"
-    "          \"sets\": integer,\n"
-    "          \"reps\": integer,\n"
-    "          \"notes\": \"string\"\n"
-    "        }\n"
-    "      ]\n"
-    "    }\n"
-    "  ]\n"
-    "}\n"
-)
-
 
 
     # 📋 User profile
@@ -121,7 +83,7 @@ def generate_plan_with_llm(
     response = openai.ChatCompletion.create(
         model="mistralai/mistral-7b-instruct",
         messages=[
-            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": system_prompt_generate_plan},
             {"role": "user", "content": user_prompt}
         ],
         temperature=0,
